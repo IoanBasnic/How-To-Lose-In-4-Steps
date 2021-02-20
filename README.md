@@ -1,6 +1,6 @@
 
 # DP Project - Connect 4
-Team Members: **Bașnic Ioan, Belea Sebastian, Hovarth Petra**
+Team Members: **Ioan BAȘNIC, Sebastian BELEA, Petra HORVATH**
 ## What is it?
 Project
 
@@ -13,6 +13,6 @@ project
 ```
 
 ## Authors
-* **Bașnic Ioan** - [GitHub Profile](https://github.com/IoanBasnic)
-* **Belea Sebastian** - [GitHub Profile](https://github.com/belea-sebastian)
-* **Hovarth Petra** - [GitHub Profile](https://github.com/Petrified0110)
+* **Ioan BAȘNIC** - [GitHub Profile](https://github.com/IoanBasnic)
+* **Sebastian BELEA** - [GitHub Profile](https://github.com/belea-sebastian)
+* **Petra HORVATH** - [GitHub Profile](https://github.com/Petrified0110)
