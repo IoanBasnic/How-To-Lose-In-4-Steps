@@ -25,10 +25,13 @@ int main(void) {
 	listen(server_socket, 5);
 
 	int client_socket;
-	client_socket = accept(server_socket, NULL, NULL);
 
-	//send message
-	send(client_socket, server_message, sizeof(server_message), 0);
+	int i = 1;
+ 	//send message
+	 while(i) {
+		client_socket = accept(server_socket, NULL, NULL);
+		send(client_socket, server_message, sizeof(server_message), 0);
+	 }
 
 	//close socket
 	close(server_socket);
