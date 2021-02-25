@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 #include <sys/socket.h>
 #include <sys/types.h>
 
@@ -27,9 +28,22 @@ int main(void) {
 	int client_socket;
 
 	int i = 1;
+
+	//IANI STUFF - TEST
+	char server_response[256];
+	//
+
  	//send message
 	 while(i) {
+
+	 	
 		client_socket = accept(server_socket, NULL, NULL);
+
+		//IANI STUFF - TEST
+	 	recv(client_socket, &server_response, sizeof(server_response), 0);
+		printf("The client data: %s\n", server_response);
+		//
+
 		send(client_socket, server_message, sizeof(server_message), 0);
 	 }
 
