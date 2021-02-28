@@ -48,7 +48,7 @@ int main(void) {
 	 }
 
 	//close socket
-	close(server_socket);
+	pclose(server_socket);
 
 	return 0;
 }

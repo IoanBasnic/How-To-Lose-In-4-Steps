@@ -97,7 +97,7 @@ void ShowMessageError(char *server_input) // needs to be discused
 void applyChanges(char *server_input) //e.g. of input "11-1", where 11 is the position and "-1" (or "1") is the player
 {
 	//printf("%d %d %d", server_input[0] - '0', server_input[1] - '0', server_input[3] - '0');
-	disc[ server_input[0] - '0'][ server_input[1] - '0'] =  server_input[3] - '0';
+	disc[ server_input[0] - '1'][ server_input[1] - '1'] =  server_input[3] - '0';
 }
 
 void menu(char *server_input) //prints text and board game and apply the changes
@@ -109,7 +109,6 @@ void menu(char *server_input) //prints text and board game and apply the changes
 		applyChanges(server_input);
 		displayBoard();
 	}
-	
 	else
 	{
 		ShowMessageError(server_input);	
@@ -173,6 +172,6 @@ int main(void) {
 
 	//print out the servers response
 	printf("The server data: %s\n", server_response);
-	close(network_socket);
+	pclose(network_socket);
 	return 0;
 }
