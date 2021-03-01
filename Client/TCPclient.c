@@ -97,7 +97,7 @@ void ShowMessageError(char *server_input) // needs to be discused
 void applyChanges(char *server_input) //e.g. of input "11-1", where 11 is the position and "-1" (or "1") is the player
 {
 	//printf("%d %d %d", server_input[0] - '0', server_input[1] - '0', server_input[3] - '0');
-	disc[ server_input[0] - '0'][ server_input[1] - '0'] =  server_input[3] - '0';
+	disc[ server_input[0] - '1'][ server_input[1] - '1'] =  server_input[3] - '0';
 }
 
 void menu(char *server_input) //prints text and board game and apply the changes
@@ -109,7 +109,6 @@ void menu(char *server_input) //prints text and board game and apply the changes
 		applyChanges(server_input);
 		displayBoard();
 	}
-	
 	else
 	{
 		ShowMessageError(server_input);	
@@ -118,6 +117,8 @@ void menu(char *server_input) //prints text and board game and apply the changes
 
 int main(void) {
 
+	int error = 0;
+	socklen_t len = sizeof (error);
 
 		// "32-1/2-"
 	//******* TEST
@@ -126,8 +127,8 @@ int main(void) {
 	printf("Connecting to the server. Please wait...\n");
 	//****** /TEST
 	//create socket
-	int network_socket;
-	network_socket = socket(AF_INET, SOCK_STREAM, 0);
+	int server_socket;
+	server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
 	//specify an address for the socket
 	struct sockaddr_in server_address;
@@ -135,7 +136,7 @@ int main(void) {
 	server_address.sin_port = htons (9002);
 	server_address.sin_addr.s_addr = INADDR_ANY;
 
-	int connection_status = connect(network_socket, (struct sockaddr * ) &server_address, sizeof(server_address));
+	int connection_status = connect(server_socket, (struct sockaddr * ) &server_address, sizeof(server_address));
 
 	//check for error with connection
 
@@ -145,34 +146,29 @@ int main(void) {
 	}
 
 	//receive data from the server
-	char server_response[256];
+	char server_response[256] = "None";
 	char MyResponse[256];
-	int server_socket;
+	int server_fd;
 
+	int message = 0;
 
-	displayBoard();
+	server_fd = accept(server_socket, NULL, NULL);
+	//displayBoard();
 
-	while( 1 )
+	//if this is ever equal to 0, the connection to the server stopped
+	int response_code;
+
+	while(response_code != 0)
 	{
-		server_socket = accept(network_socket, NULL, NULL);
+		// menu(MyResponse);
 
-		printf("INPUT: ");
-		scanf("%s", MyResponse);
+		response_code = recv(server_socket, &message, sizeof(message), 0);
+		printf("%d\n", message);
 
-
-		menu(MyResponse);
-
-
-
-		//send(server_socket, MyResponse, sizeof(MyResponse), 0);
-
-		//recv(network_socket, &server_response, sizeof(server_response), 0);
-		printf("The server data: %s\n", server_response);
 	}
-	//recv(network_socket, &server_response, sizeof(server_response), 0);
 
 	//print out the servers response
 	printf("The server data: %s\n", server_response);
-	close(network_socket);
+	pclose(&server_socket);
 	return 0;
 }
