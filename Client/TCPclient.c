@@ -15,7 +15,6 @@
 #define ANSI_COLOR_RESET   "\x1b[0m"
 // 0 - nothing, 1 - player 1, 2 - player 2
 
-
 int disc[6][7] = {
 	{0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0},
