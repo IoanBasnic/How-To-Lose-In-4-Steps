@@ -38,8 +38,8 @@ int main(void) {
 
 	while(1) {
 		int message = 0;
-		recv(client_fd[0],&message, sizeof(message), 0);
-		printf("%d\n",message);
+		recv(client_fd[0], &message, sizeof(message), 0);
+		printf("%d\n", message);
 	}
 
 	//  while(i) {
