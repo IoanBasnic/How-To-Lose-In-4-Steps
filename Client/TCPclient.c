@@ -25,7 +25,12 @@ int disc[6][7] = {
 };
 
 
+// Client2Server
+// [A-H]
 
+// Server2Client
+// [1-7][1-6]-[1-2]-[0-?]-[0-1-2-3]
+// [row][column]-[player]-[encoded error]-[game finished(0 - not finished, 1 - player 1 won, 2 - player 2 won, 3 - tie)]
 
 // +---+---+---+---+---+---+---+
 // |   |   |   |   |   |   |   |

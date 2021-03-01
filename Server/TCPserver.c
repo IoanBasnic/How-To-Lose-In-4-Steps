@@ -23,7 +23,7 @@ int main(void) {
 	//bind the socket t our specified IP and port
 	bind(server_socket, (struct sockaddr*) & server_address, sizeof(server_address));
 
-	listen(server_socket, 5);
+	listen(server_socket, 2);
 
 	int client_fd[2];
 
