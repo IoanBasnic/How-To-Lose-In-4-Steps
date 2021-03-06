@@ -25,6 +25,21 @@ int disc[6][7] = {
 	{0, 0, 0, 0, 0, 0, 0},
 };
 
+typedef struct{
+	char error_name[256];
+}errors;
+
+errors server_errors[] = {
+	[0] = {"Please choose a column"},
+    [1] = {"Please choose only one column"},
+    [2] = {"Please insert only one character"},
+    [3] = {"Please insert only letters, digits are not accepted"},
+    [4] = {"Please choose a letter only from A to G"},
+    [5] = {"This column is full, you can't place any piece"},
+    [6] = {"Please wait your turn"}
+  };
+
+// if encoded_error = 7 -> valid move
 
 // Client2Server
 // [A-H]
