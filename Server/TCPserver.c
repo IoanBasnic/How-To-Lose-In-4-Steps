@@ -8,9 +8,13 @@
 
 #include <netinet/in.h>
 
+#define N 6
+#define M 7
+int key = 4;
+
 int board[N][M] = {0};
-int column_full = 1, line, column;
-int error_index = 7;
+int column_full = 1, line, column = -1;
+int error_index = 0;
 
 int is_board_full()
 {
@@ -33,14 +37,17 @@ int is_board_full()
     return 0;
 }
 
-void pick_position(int player)
+int is_column_full(){
+	return board[0][column] =! 0;
+}
+
+void make_move(int player)
 {
   for(int i=N-1; i>=0; i--)
   {
   	if(board[i][column] == 0)
   	{
-      board[i][column] = player; 
-      column_full = 0;
+      board[i][column] = player + 1; 
       line = i;
       return;
   	}
@@ -57,7 +64,7 @@ int chech_win(int player)
         	{
               if(board[i][j] != 0 && board[i][j]==board[i][j+1] && board[i][j]==board[i][j+2] && board[i][j]==board[i][j+3])
               {
-                return player;
+                return 1;
               }
             }
         }
@@ -68,7 +75,7 @@ int chech_win(int player)
         {
             if(board[i][j] != 0 && board[i][j]==board[i+1][j] && board[i][j]==board[i+2][j] && board[i][j]==board[i+3][j])
             {
-              return player;
+              return 1;
             }
         }    
     }   
@@ -79,7 +86,7 @@ int chech_win(int player)
         {
             if(board[i][j] != 0 && board[i][j]==board[i+1][j+1] && board[i][j]==board[i+2][j+2] && board[i][j]==board[i+3][j+3])
             {
-              return player;
+              return 1;
             }
         }
     }
@@ -90,7 +97,7 @@ int chech_win(int player)
         {
             if(board[i][j] != 0 && board[i][j]==board[i+1][j-1] && board[i][j]==board[i+2][j-2] && board[i][j]==board[i+3][j-3])
             {
-              return player;
+              return 1;
             }
         }
     }
@@ -98,81 +105,38 @@ int chech_win(int player)
     return 0;
 }
 
-void input_validation(char *input)
+int input_validation(char *input)
 {
-  int valid_choice = 0;
   char choice;
-  int j;
   
-  if(strlen(input) < 1) {
-  	error_index = 0;
-  	return;
-  }
-
-  for(int i = 0; input[i+1] != '\0'; i++)
-  {
-    j = i;
-    if(isspace(input[i]) && !isspace(input[j+1]))
-    {
-     	error_index = 1;
-        return;
-     }
-  }
- 
-    if(strlen(input) != 1){
-    	error_index = 2;
-    	return;
-    }
+  if(strlen(input) != 1)
+  	return 1;
     
    sscanf(input, "%c", &choice);
 
-   if(isdigit(choice))
-   {
-     error_index = 3;
-     return;
-   }
+	if(isdigit(choice))
+    	return 2;
    
-   if((choice == 'A') || (choice == 'B') || (choice == 'C') || (choice == 'D') || 
-   	  (choice == 'E') || (choice == 'F') || (choice == 'G'))
+	if(!((choice == 'A') || (choice == 'B') || (choice == 'C') || (choice == 'D') || 
+	  (choice == 'E') || (choice == 'F') || (choice == 'G')))
+    	return 2;
+
+   column = choice - 'A';
+
+   if(is_column_full())
    {
-   	valid_choice = 1;
+		column = -1;
+     	return 3;
    }
 
-   if(valid_choice != 1)
-   {
-     error_index = 4;
-     return;
-   }
-
-   switch(choice)
-   {
-     case 'A': column = 0;
-               break;
-     case 'B': column = 1;
-               break;
-     case 'C': column = 2;
-               break;
-     case 'D': column = 3;
-               break;
-     case 'E': column = 4;
-               break;
-     case 'F': column = 5;
-               break;
-     case 'G': column = 6;
-               break;
-     default:  return;
-               break;                
-
-   }
+   return 0;
 }
 
 
-char * encryptMessageServer(char * string, int key)
+char * encryptMessageServer(char * string)
 {
-
-
 	char *message;
-	memcpy(message, string, sizeof(string));
+	memcpy(message, string, strlen(string));
 	char aux;
 
 	
@@ -213,7 +177,7 @@ char * encryptMessageServer(char * string, int key)
 	return message;
 }
 
-char * decryptMessageServer(char * string, int key)
+char * decryptMessageServer(char * string)
 {
 
 	
@@ -260,8 +224,6 @@ char * decryptMessageServer(char * string, int key)
 
 
 int main(void) {
-	char server_message[256] = "You have reached the server!";
-
 	//create the server socket
 	int server_socket;
 	server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -279,26 +241,89 @@ int main(void) {
 
 	int client_fd[2];
 
-	//IANI STUFF - TEST
-	char server_response[256];
-	//
+	//First we send each client the allocated to number, so they know which client they are
 	for (int i = 0; i < 2; i++){
 		client_fd[i] = accept(server_socket, NULL, NULL);
 		int message = i;
 		send(client_fd[i], &message, sizeof(message), 0);
 	}
 
-	while(1) {
-		int message = 0;
-		recv(client_fd[0], &message, sizeof(message), 0);
-		printf("%d\n", message);
-        
+	int responseCode[2];
+	int whoseTurn = 0;
+	int otherPlayer = 1;
+
+	while(responseCode[0] != 0 && responseCode[1] != 0) {
+		char* messageToSend = "00-0-0-0";
+		char* messageToReceive;
+
+		if(is_board_full()){
+			messageToSend[5] = (char)(0);
+			messageToSend[7] = (char)(3);
+			for(int i = 0; i < 2; i++){
+				send(client_fd[i], &messageToSend, sizeof(messageToSend), 0);
+			}
+			pclose(&server_socket);
+			return 0;
+		}
+
+		//We wait for a valid message from the player
+		int error_index = -1;
+		do{
+			responseCode[whoseTurn] = recv(server_socket, &messageToReceive, sizeof(char), 0);
+
+			error_index = input_validation(messageToReceive);
+
+			if(error_index){
+				messageToSend[3] = (char)(whoseTurn + 1);
+				messageToSend[5] = (char)(error_index);
+
+				send(client_fd[whoseTurn], &messageToSend, sizeof(messageToSend), 0);
+			}
+
+		} while(error_index != 0);
+
+		make_move(whoseTurn);
+
+		if(chech_win(whoseTurn)){
+			messageToSend[7] = (char)(whoseTurn + 1);
+			for(int i = 0; i < 2; i++){
+				send(client_fd[i], &messageToSend, sizeof(messageToSend), 0);
+			}
+			pclose(&server_socket);
+			return 0;
+		}
+
+		if(line == -1 || column == -1){
+			messageToSend[5] = (char)(6);
+			for(int i = 0; i < 2; i++){
+				send(client_fd[i], &messageToSend, sizeof(messageToSend), 0);
+			}
+			pclose(server_socket);
+			return 0;
+		}
+		else{
+
+			messageToSend[0] = (char)(line);
+			messageToSend[1] = (char)(column);
+			messageToSend[3] = (char)(whoseTurn + 1);
+			messageToSend[5] = (char)(0);
+			messageToSend[7] = (char)(0);
+			send(client_fd[otherPlayer], &messageToSend, sizeof(messageToSend), 0);
+			send(client_fd[whoseTurn], &messageToSend, sizeof(messageToSend), 0);
+					
+			column = -1;
+			line = -1;
+
+			int aux = whoseTurn;
+			whoseTurn = otherPlayer;
+			otherPlayer = aux;
+		}
         /* if not player turn -> error_index = 6
-         * input_validation(message);
-         * if(!is_board_full())
+         * input_validation(message); v
+         * if(!is_board_full()) v
          * {
-         *   pick_position(player //1 - 2);
-         *   if(column_full)
+         *   make_move(player //1 - 2);
+         *   if(column_full) v
          *   {
                error_index = 5;
                // send to the client
@@ -308,27 +333,24 @@ int main(void) {
                status_code = chech_win(player) // 0 - 1 - 2
              }
          * }
-            
          *  server_response = line+column-status_code-error_index
-         * 
-         * 
          */
 	}
 
-	//  while(i) {
- 	
-	// 	//IANI STUFF - TEST
-	//  	//recv(client_fd, &server_response, sizeof(server_response), 0);
-	// 	//printf("The client data: %s\n", server_response);
-	// 	//
+	if(responseCode[0] == 0){
+		char* message = "00-2-4-4";
+		char* encryptedMessage = encryptMessageServer(message);
 
-	// 	//send(client_fd, server_message, sizeof(server_message), 0);
-	// 	int message[3] = {i, i, i};
-	// 	send(client_fd[i], message, sizeof(message), 0);
-	//  }
+		send(client_fd[1], &encryptedMessage, sizeof(encryptedMessage), 0);
+	}
+	else if(responseCode[1] == 0){
+		char* message = "00-1-4-4";
+		char* encryptedMessage = encryptMessageServer(message);
 
-	//close socket
-	pclose(server_socket);
+		send(client_fd[0], &encryptedMessage, sizeof(encryptedMessage), 0);
+	}
+
+	pclose(&server_socket);
 
 	return 0;
 }

@@ -39,14 +39,6 @@ errors server_errors[] = {
     [6] = {"Please wait your turn"}
   };
 
-// if encoded_error = 7 -> valid move
-
-// Client2Server
-// [A-H]
-
-// Server2Client
-// [1-7][1-6]-[1-2]-[0-?]-[0-1-2-3]
-// [row][column]-[player]-[encoded error]-[game finished(0 - not finished, 1 - player 1 won, 2 - player 2 won, 3 - tie)]
 
 // +---+---+---+---+---+---+---+
 // |   |   |   |   |   |   |   |
@@ -130,7 +122,7 @@ char * encryptMessageClient(char * string, int key)
 
 
 	char *message;
-	memcpy(message, string, sizeof(string));
+	memcpy(message, string, strlen(string));
 	char aux;
 
 	
@@ -216,8 +208,6 @@ char * decryptMessageServer(char * string, int key)
 }
 
 
-
-
 char * decryptMessageClient(char * string, int key)
 {
 
@@ -264,7 +254,7 @@ char * decryptMessageClient(char * string, int key)
 	return message;
 }
 
-void menu(char *server_input) //prints text and board game and apply the changes
+int menu(char *server_input) //prints text and board game and apply the changes
 {
 
 	if( (server_input[5] - '0') == 0)
@@ -319,20 +309,41 @@ int main(void) {
 	char MyResponse[256];
 	int server_fd;
 
-	int message = 0;
+	char message = 0;
 
 	server_fd = accept(server_socket, NULL, NULL);
-	//displayBoard();
 
 	//if this is ever equal to 0, the connection to the server stopped
 	int response_code;
+	int whatPlayerAmI;
+	char choice;
+	char* response = (char*)malloc(sizeof(char) * 8);
+
+	response_code = recv(server_socket, &whatPlayerAmI, sizeof(whatPlayerAmI), 0);
+	printf("You are playing as player %d!\n", whatPlayerAmI);
+
+	if(whatPlayerAmI == 1){
+		displayBoard();
+		printf("What column(A-Z) would you like to start with?\n");
+
+		//CHECK IF INPUT IS MORE THAN 1 CHAR
+		scanf(choice, "%c\n");
+
+		send(server_socket, &choice, sizeof(choice), 0);
+	}
+
+	int whoseTurn;
 
 	while(response_code != 0)
 	{
-		// menu(MyResponse);
+		response_code = recv(server_socket, &response, sizeof(response), 0);
+		//whoseTurn = menu(response);
 
-		response_code = recv(server_socket, &message, sizeof(message), 0);
-		printf("%d\n", message);
+		// if(whatPlayerAmI == whoseTurn){
+		// 	send
+		// }
+		
+		response_code = recv(server_socket, &response, sizeof(response), 0);
 
 	}
 
