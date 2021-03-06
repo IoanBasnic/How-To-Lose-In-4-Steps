@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -104,6 +105,150 @@ void applyChanges(char *server_input) //e.g. of input "11-1", where 11 is the po
 	disc[ server_input[0] - '1'][ server_input[1] - '1'] =  server_input[3] - '0';
 }
 
+
+
+
+//ENCRYPT &  DECRYPT MESSAGE
+
+char * encryptMessageClient(char * string, int key)
+{
+
+
+	char *message;
+	memcpy(message, string, sizeof(string));
+	char aux;
+
+	
+	for(int i = 0; message[i] != '\0'; i++)
+	{
+		aux = message[i];
+		
+		if(aux >= 'a' && aux <= 'z')
+		{	
+			
+			aux = aux + key;
+			
+			if(aux > 'z')
+			{
+
+				aux = aux - 'z' + 'a' - 1;
+			}
+
+			message[i] = aux;
+
+		}
+
+		else if(aux >= 'A' && aux <= 'Z')
+		{
+			aux = aux + key;
+			if(aux > 'Z')
+			{
+				aux = aux - 'Z' + 'A' - 1;
+			}
+
+			message[i] = aux;
+			
+		}
+	}
+
+	
+	return message;
+}
+
+char * decryptMessageServer(char * string, int key)
+{
+
+	
+	char *message = malloc(4*sizeof(char * ));
+	strcpy(message, string);
+	char aux;
+
+	
+	for(int i = 0; message[i] != '\0'; i++)
+	{
+		aux = message[i];
+		
+		if(aux >= 'a' && aux <= 'z')
+		{	
+			
+			aux = aux - key;
+			
+			if(aux < 'a')
+			{
+
+				aux = aux + 'z' - 'a' + 1;
+			}
+
+			message[i] = aux;
+
+		}
+
+		else if(aux >= 'A' && aux <= 'Z')
+		{
+			aux = aux - key;
+			if(aux < 'A')
+			{
+				aux = aux + 'Z' - 'A' + 1;
+			}
+
+			message[i] = aux;
+			
+		}
+	}
+
+	
+	return message;
+}
+
+
+
+
+char * decryptMessageClient(char * string, int key)
+{
+
+	
+	char *message = malloc(4*sizeof(char * ));
+	strcpy(message, string);
+	char aux;
+
+	
+	for(int i = 0; message[i] != '\0'; i++)
+	{
+		aux = message[i];
+		
+		if(aux >= '0' && aux <= '9')
+		{	
+			
+			aux = aux - key;
+			
+			if(aux < '0')
+			{
+
+				aux = aux + '9' - '0' + 1;
+			}
+
+			message[i] = aux;
+
+		}
+
+		else
+		{
+			aux = aux - key;
+			
+			if(aux > '-')
+			{
+				aux = aux - '-' + 1;
+			}
+
+			message[i] = aux;
+			
+		}
+	}
+
+	
+	return message;
+}
+
 void menu(char *server_input) //prints text and board game and apply the changes
 {
 
@@ -121,6 +266,11 @@ void menu(char *server_input) //prints text and board game and apply the changes
 
 int main(void) {
 
+
+	
+	// printf("%s\n", encryptMessage("11-1-0", 4));
+	// printf("%s\n", decryptMessage("55]5]4", 4));
+	
 	int error = 0;
 	socklen_t len = sizeof (error);
 
