@@ -1,11 +1,105 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
 
 #include <netinet/in.h>
+
+
+
+char * encryptMessageServer(char * string, int key)
+{
+
+
+	char *message;
+	memcpy(message, string, sizeof(string));
+	char aux;
+
+	
+	for(int i = 0; message[i] != '\0'; i++)
+	{
+		aux = message[i];
+		
+		if(aux >= '0' && aux <= '9')
+		{	
+			
+			aux = aux + key;
+			
+			if(aux > '9')
+			{
+
+				aux = aux - '9' + '0' - 1;
+			}
+
+			message[i] = aux;
+
+		}
+
+		else if(aux =='-')
+		{
+			aux = aux + key;
+			
+			if(aux > '-')
+			{
+				aux = aux + '-' - 1;
+			}
+
+			message[i] = aux;
+			
+		}
+	}
+
+	
+	return message;
+}
+
+char * decryptMessageServer(char * string, int key)
+{
+
+	
+	char *message = malloc(4*sizeof(char * ));
+	strcpy(message, string);
+	char aux;
+
+	
+	for(int i = 0; message[i] != '\0'; i++)
+	{
+		aux = message[i];
+		
+		if(aux >= 'a' && aux <= 'z')
+		{	
+			
+			aux = aux - key;
+			
+			if(aux < 'a')
+			{
+
+				aux = aux + 'z' - 'a' + 1;
+			}
+
+			message[i] = aux;
+
+		}
+
+		else if(aux >= 'A' && aux <= 'Z')
+		{
+			aux = aux - key;
+			if(aux < 'A')
+			{
+				aux = aux + 'Z' - 'A' + 1;
+			}
+
+			message[i] = aux;
+			
+		}
+	}
+
+	
+	return message;
+}
+
 
 int main(void) {
 	char server_message[256] = "You have reached the server!";
