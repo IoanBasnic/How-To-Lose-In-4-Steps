@@ -291,26 +291,29 @@ int main(void) {
 		while(strlen(choice) > 1)
 		{
 			printf("%s\t %s\n", server_errors[2].error_name, server_errors[4].error_name);
-			scanf("%s", choice);
+			scanf("%s\n", choice);
 		}
 		
 		memcpy(response_encrypt, encryptMessageClient(choice, 10), 1);
-		//printf("%s\n", response_encrypt);
-		send(server_socket, &response_encrypt, sizeof(choice), 0);
+		char final_response = response_encrypt[0];
+		printf("%c\n", final_response);
+		send(server_fd, &final_response, sizeof(final_response), 0);
+		send(server_fd, &final_response, sizeof(char), 0);
+		send(server_fd, &final_response, sizeof(char), 0);
 	}
 
 	int whoseTurn;
 
 	while(response_code != 0)
 	{
-		response_code = recv(server_socket, &response, sizeof(response), 0);
+		response_code = recv(server_fd, &response, sizeof(response), 0);
 		//whoseTurn = menu(response);
 
 		// if(whatPlayerAmI == whoseTurn){
 		// 	send
 		// }
 		
-		response_code = recv(server_socket, &response, sizeof(response), 0);
+		response_code = recv(server_fd, &response, sizeof(response), 0);
 
 	}
 

@@ -12,16 +12,28 @@
 #define M 7
 int key = 4;
 
-int board[N][M] = {0};
+int **board;
 int column_full = 1, line, column = -1;
 int error_index = 0;
+
+void initializeBoard(){
+	board = (int**)malloc(sizeof(int*)*N);
+
+	for(int i = 0; i < M; i++){
+		board[i] = (int*)malloc(sizeof(int) * M);
+	}
+
+	for(int i = 0; i < N; i++)
+		for(int j = 0; j < M; j++)
+			board[i][j] = 0;
+}
 
 int is_board_full()
 {
     int i = N-1;
     int count = 0;
     
-    for(int j=0; j<M-1; j++)
+    for(int j=0; j<M; j++)
     {
         if(board[i][j] != 0)
         {
@@ -30,10 +42,8 @@ int is_board_full()
     }
     
     if(count == M)
-    {
         return 1;
-    }
-    
+
     return 0;
 }
 
@@ -248,21 +258,14 @@ int main(void) {
 		send(client_fd[i], &message, sizeof(message), 0);
 	}
 
-	printf("TEST\n");
-
-	int responseCode[2];
+	int responseCode[2] = {1, 1};
 	int whoseTurn = 0;
 	int otherPlayer = 1;
+	initializeBoard();
 
-
-	//aici PUSCA!!!!!!!!!!!!!!!!
-	//while(responseCode[0] != 0 && responseCode[1] != 0) {
-		while(1 > 0) {
+	while(responseCode[0] != 0 && responseCode[1] != 0) {
 		char* messageToSend = "00-0-0-0";
-		char* messageToReceive;
-
-
-		
+		char* messageToReceive = (char*)malloc(sizeof(char));
 
 		if(is_board_full()){
 			messageToSend[5] = (char)(0);
@@ -275,10 +278,14 @@ int main(void) {
 		}
 
 		//We wait for a valid message from the player
-		int error_index = -1;
+		int error_index = 0;
 		do{
-			responseCode[whoseTurn] = recv(server_socket, &messageToReceive, sizeof(char), 0);
-			printf("%s", messageToReceive);
+			printf("%s\n", messageToSend);
+			printf("turn : %d\n", whoseTurn);
+			responseCode[whoseTurn] = recv(client_fd[whoseTurn], messageToReceive, sizeof(char), 0);
+			printf("got here\n");
+			messageToReceive = decryptMessageServer(messageToReceive);
+			printf("%c\n", messageToReceive);
 			error_index = input_validation(messageToReceive);
 
 			if(error_index){
@@ -306,7 +313,7 @@ int main(void) {
 			for(int i = 0; i < 2; i++){
 				send(client_fd[i], &messageToSend, sizeof(messageToSend), 0);
 			}
-			pclose(server_socket);
+			pclose(&server_socket);
 			return 0;
 		}
 		else{
@@ -358,7 +365,7 @@ int main(void) {
 		send(client_fd[0], &encryptedMessage, sizeof(encryptedMessage), 0);
 	}
 
-	pclose(&server_socket);
+	pclose(server_socket);
 
 	return 0;
 }
