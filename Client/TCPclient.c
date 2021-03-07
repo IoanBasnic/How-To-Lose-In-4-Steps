@@ -30,13 +30,13 @@ typedef struct
 } errors;
 
 errors server_errors[] = {
-		[0] = {"Please choose a column"},
-		[1] = {"Please choose only one column"},
-		[2] = {"Please insert only one character"},
-		[3] = {"Please insert only letters, digits are not accepted"},
-		[4] = {"Please choose a letter only from A to G"},
-		[5] = {"This column is full, you can't place any piece"},
-		[6] = {"Please wait your turn"}};
+		[0] = {"Invalid input length"},
+		[1] = {"Invalid character"},
+		[2] = {"Invalid move"},
+		[3] = {"The other player's server is down"},
+		[4] = {"Not this player's turn"},
+		[5] = {"Something unexpected went wrong"}
+		};
 
 // +---+---+---+---+---+---+---+
 // |   |   |   |   |   |   |   |
@@ -97,14 +97,66 @@ void clearScreen()
 	}
 }
 
-void ShowMessageError(char *server_input) // needs to be discused
+
+void ShowMessageError(int input) // needs to be discused
+{printf("%s\n", server_errors[2].error_name);
+	switch(input)
+	{
+		case 1:
+			printf("%s\n", server_errors[0].error_name);
+			break;
+		case 2:
+			printf("%s\n", server_errors[1].error_name);
+			break;
+		case 3:
+			printf("%s\n", server_errors[2].error_name);
+			break;
+		case 4:
+			printf("%s\n", server_errors[3].error_name);
+			break;
+		case 5:
+			printf("%s\n", server_errors[4].error_name);
+			break;
+		case 6:
+			printf("%s\n", server_errors[5].error_name);
+			break;
+		default:
+			printf("Something unexpected happened\n");
+
+
+	}
+}
+
+void printWiningPlayer(int input)
 {
+	switch(input)
+	{
+		case 1:
+			printf("Game status: Player 1 won!\n");
+			break;
+		case 2:
+			printf("Game status: Player 2 won!\n");
+			break;
+		case 3:
+			printf("Game status: Tie!\n");
+			break;
+		case 4:
+			printf("Game status: Some unexpected error occured!\n");
+			break;
+		default:
+			printf("Something unexpected happened\n");
+
+
+	}
+
+
 }
 
 void applyChanges(char *server_input) //e.g. of input "11-1", where 11 is the position and "-1" (or "1") is the player
 {
 	//printf("%d %d %d", server_input[0] - '0', server_input[1] - '0', server_input[3] - '0');
-	disc[server_input[0] - '1'][server_input[1] - '1'] = server_input[3] - '0';
+	printf("%d %d\n", server_input[0] - '0', server_input[1] - '0');
+	disc[server_input[0] - '0'][server_input[1] - '0'] = server_input[3] - '0';
 }
 
 //ENCRYPT &  DECRYPT MESSAGE
@@ -153,7 +205,7 @@ char *encryptMessageClient(char *string, int key)
 char *decryptMessageClient(char *string, int key)
 {
 
-	char *message = malloc(4 * sizeof(char *));
+	char *message = malloc(10 * sizeof(char *));
 	strcpy(message, string);
 	char aux;
 
@@ -194,16 +246,27 @@ char *decryptMessageClient(char *string, int key)
 int menu(char *server_input) //prints text and board game and apply the changes
 {
 
-	if ((server_input[5] - '0') == 0)
+	
+
+	if ((server_input[7] - '0') == 0)
 	{
-		clearScreen();
-		applyChanges(server_input);
-		displayBoard();
+		if ((server_input[5] - '0') == 0)
+		{
+			clearScreen();
+			applyChanges(server_input);
+			displayBoard();
+		}
+		else
+		{
+			ShowMessageError(server_input[5] - '0');
+		}
 	}
 	else
 	{
-		ShowMessageError(server_input);
+		printWiningPlayer(server_input[7] - '0');
 	}
+
+	return server_input[3] - '0';
 }
 
 int main(void)
@@ -212,8 +275,8 @@ int main(void)
 	// printf("%s\n", encryptMessage("11-1-0", 4));
 	// printf("%s\n", decryptMessage("55]5]4", 4));
 
-	int error = 0;
-	socklen_t len = sizeof(error);
+	//int error = 0;
+	//socklen_t len = sizeof(error);
 
 	// "32-1/2-"
 	//******* TEST
@@ -245,20 +308,28 @@ int main(void)
 	}
 
 	//receive data from the server
-	char server_response[256] = "None";
-	char MyResponse[256];
+	//char server_response[256] = "None";
+	//char MyResponse[256];
 
-	char message = 0;
+	//char message = 0;
 
 	//if this is ever equal to 0, the connection to the server stopped
 	int response_code;
 	int whatPlayerAmI;
 	char choice[256];
-	char *response = (char *)malloc(sizeof(char) * 8);
-	char *response_encrypt = (char *)malloc(sizeof(char) * 8);
+	char response[256];
+	char *response_encrypt = malloc(10 * sizeof(char *));
 	response_code = recv(server_socket, &whatPlayerAmI, sizeof(whatPlayerAmI), 0);
 	printf("You are playing as player %d!\n", whatPlayerAmI + 1); // whatPlayerAmI = 0 or 1
-	int howManyBytesSent = 0;
+	//int howManyBytesSent = 0;
+
+	
+	if(whatPlayerAmI == 1)
+	{
+		displayBoard();
+		printf("Please wait for player 1 move\n");
+	}
+
 	if (whatPlayerAmI == 0)
 	{
 		displayBoard();
@@ -269,37 +340,79 @@ int main(void)
 
 		while (strlen(choice) > 1)
 		{
-			printf("%s\t %s\n", server_errors[2].error_name, server_errors[4].error_name);
+			printf("%s\n", server_errors[0].error_name);
 			scanf("%s\n", choice);
 		}
 
 		memcpy(response_encrypt, encryptMessageClient(choice, 4), 1);
 		char final_response = response_encrypt[0];
-		printf("%c\n", final_response);
+		
 		send(server_socket, &final_response, sizeof(final_response), 0);
 
-		response_code = recv(server_socket, &response, sizeof(response), 0);
+		
+		
+		
 	}
 	
+	response_code = recv(server_socket,  &response, 9, 0);
+	response[8] = '\0';
 
-	int whoseTurn;
+	
+	strcpy(response, decryptMessageClient(response, 4));
+	
 
-	while (response_code != 0)
-	{
-		response_code = recv(server_socket, &response, sizeof(response), 0);
-		//whoseTurn = menu(response);
+	int whoseTurn = menu(response);
+	
+	
+	while (response_code)
+	{	
 
-		// if(whatPlayerAmI == whoseTurn){
-		//
-		// 	send
-		//  response_code = recv(server_socket, &response, sizeof(response), 0);
-		// }
+		printf("TEST -- %d -- %d\n", whoseTurn-1, whatPlayerAmI);
+
+
+		if(whoseTurn == whatPlayerAmI)
+		{
+			printf("Please wait for other player move\n");
+			response_code = recv(server_socket, &response, sizeof(response), 0);
+			whoseTurn = menu(response);
+		}
+
+		else
+		{
+			printf("What column(A-G) would you like to start with?\n");
+
+			//CHECK IF INPUT IS MORE THAN 1 CHAR
+			scanf("%s", choice);
+
+			while (strlen(choice) > 1)
+			{
+				printf("%s\n", server_errors[0].error_name);
+				scanf("%s\n", choice);
+			}
+
+			memcpy(response_encrypt, encryptMessageClient(choice, 4), 1);
+			char final_response = response_encrypt[0];
+		
+			send(server_socket, &final_response, sizeof(final_response), 0);
+
+			response_code = recv(server_socket,  &response, 9, 0);
+			response[8] = '\0';
+
+	
+			strcpy(response, decryptMessageClient(response, 4));
+	
+			whoseTurn = menu(response);
+		}
+		
+
+
+
+
+		
 
 		
 	}
 
-	//print out the servers response
-	printf("The server data: %s\n", server_response);
 	close(server_socket);
 	return 0;
 }
