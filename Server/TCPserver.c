@@ -135,7 +135,7 @@ int input_validation(char *input)
 
 char * encryptMessageServer(char * string)
 {
-	char *message;
+	char *message = malloc(4*sizeof(char * ));;
 	memcpy(message, string, strlen(string));
 	char aux;
 
@@ -248,13 +248,21 @@ int main(void) {
 		send(client_fd[i], &message, sizeof(message), 0);
 	}
 
+	printf("TEST\n");
+
 	int responseCode[2];
 	int whoseTurn = 0;
 	int otherPlayer = 1;
 
-	while(responseCode[0] != 0 && responseCode[1] != 0) {
+
+	//aici PUSCA!!!!!!!!!!!!!!!!
+	//while(responseCode[0] != 0 && responseCode[1] != 0) {
+		while(1 > 0) {
 		char* messageToSend = "00-0-0-0";
 		char* messageToReceive;
+
+
+		
 
 		if(is_board_full()){
 			messageToSend[5] = (char)(0);
@@ -270,7 +278,7 @@ int main(void) {
 		int error_index = -1;
 		do{
 			responseCode[whoseTurn] = recv(server_socket, &messageToReceive, sizeof(char), 0);
-
+			printf("%s", messageToReceive);
 			error_index = input_validation(messageToReceive);
 
 			if(error_index){

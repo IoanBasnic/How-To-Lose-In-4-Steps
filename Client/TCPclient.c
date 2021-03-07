@@ -121,7 +121,7 @@ char * encryptMessageClient(char * string, int key)
 {
 
 
-	char *message;
+	char *message = malloc(4*sizeof(char * ));;
 	memcpy(message, string, strlen(string));
 	char aux;
 
@@ -159,53 +159,10 @@ char * encryptMessageClient(char * string, int key)
 	}
 
 	
-	return message;
+	return (char *) message;
 }
 
-char * decryptMessageServer(char * string, int key)
-{
 
-	
-	char *message = malloc(4*sizeof(char * ));
-	strcpy(message, string);
-	char aux;
-
-	
-	for(int i = 0; message[i] != '\0'; i++)
-	{
-		aux = message[i];
-		
-		if(aux >= 'a' && aux <= 'z')
-		{	
-			
-			aux = aux - key;
-			
-			if(aux < 'a')
-			{
-
-				aux = aux + 'z' - 'a' + 1;
-			}
-
-			message[i] = aux;
-
-		}
-
-		else if(aux >= 'A' && aux <= 'Z')
-		{
-			aux = aux - key;
-			if(aux < 'A')
-			{
-				aux = aux + 'Z' - 'A' + 1;
-			}
-
-			message[i] = aux;
-			
-		}
-	}
-
-	
-	return message;
-}
 
 
 char * decryptMessageClient(char * string, int key)
@@ -316,20 +273,30 @@ int main(void) {
 	//if this is ever equal to 0, the connection to the server stopped
 	int response_code;
 	int whatPlayerAmI;
-	char choice;
+	char choice[256];
 	char* response = (char*)malloc(sizeof(char) * 8);
-
+	char* response_encrypt = (char*)malloc(sizeof(char) * 8);
 	response_code = recv(server_socket, &whatPlayerAmI, sizeof(whatPlayerAmI), 0);
-	printf("You are playing as player %d!\n", whatPlayerAmI);
+	printf("You are playing as player %d!\n", whatPlayerAmI+1); // whatPlayerAmI = 0 or 1
 
-	if(whatPlayerAmI == 1){
+	
+
+	if(whatPlayerAmI == 0){
 		displayBoard();
-		printf("What column(A-Z) would you like to start with?\n");
+		printf("What column(A-G) would you like to start with?\n");
 
 		//CHECK IF INPUT IS MORE THAN 1 CHAR
-		scanf(choice, "%c\n");
+		scanf("%s", choice);
 
-		send(server_socket, &choice, sizeof(choice), 0);
+		while(strlen(choice) > 1)
+		{
+			printf("%s\t %s\n", server_errors[2].error_name, server_errors[4].error_name);
+			scanf("%s", choice);
+		}
+		
+		memcpy(response_encrypt, encryptMessageClient(choice, 10), 1);
+		//printf("%s\n", response_encrypt);
+		send(server_socket, &response_encrypt, sizeof(choice), 0);
 	}
 
 	int whoseTurn;
