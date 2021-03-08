@@ -14,7 +14,6 @@
 #define ANSI_COLOR_WHITE "\x1b[47m"
 #define ANSI_COLOR_RESET "\x1b[0m"
 // 0 - nothing, 1 - player 1, 2 - player 2
-
 int disc[6][7] = {
 		{0, 0, 0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0, 0, 0},
@@ -28,6 +27,8 @@ typedef struct
 {
 	char error_name[256];
 } errors;
+
+int server_socket;
 
 errors server_errors[] = {
 		[0] = {"Invalid input length"},
@@ -148,7 +149,8 @@ void printWiningPlayer(int input)
 
 
 	}
-
+	close(server_socket);
+	exit(0);
 
 }
 
@@ -271,25 +273,13 @@ int menu(char *server_input) //prints text and board game and apply the changes
 
 int main(void)
 {
-
-	// printf("%s\n", encryptMessage("11-1-0", 4));
-	// printf("%s\n", decryptMessage("55]5]4", 4));
-
-	//int error = 0;
-	//socklen_t len = sizeof(error);
-
-	// "32-1/2-"
-	//******* TEST
-
 	//displayBoard();
 	printf("Connecting to the server. Please wait...\n");
-	//****** /TEST
 	//create socket
-	int server_socket;
 	server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
 	int option = 1;
-	setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+	setsockopt(server_socket, SOL_SOCKET, SO_REUSEPORT, &option, sizeof(option));
 
 	//specify an address for the socket
 	struct sockaddr_in server_address;
@@ -307,12 +297,6 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	//receive data from the server
-	//char server_response[256] = "None";
-	//char MyResponse[256];
-
-	//char message = 0;
-
 	//if this is ever equal to 0, the connection to the server stopped
 	int response_code;
 	int whatPlayerAmI;
@@ -321,7 +305,6 @@ int main(void)
 	char *response_encrypt = malloc(10 * sizeof(char *));
 	response_code = recv(server_socket, &whatPlayerAmI, sizeof(whatPlayerAmI), 0);
 	printf("You are playing as player %d!\n", whatPlayerAmI + 1); // whatPlayerAmI = 0 or 1
-	//int howManyBytesSent = 0;
 
 	
 	if(whatPlayerAmI == 1)
@@ -348,10 +331,6 @@ int main(void)
 		char final_response = response_encrypt[0];
 		
 		send(server_socket, &final_response, sizeof(final_response), 0);
-
-		
-		
-		
 	}
 	
 	response_code = recv(server_socket,  &response, 9, 0);
@@ -408,13 +387,6 @@ int main(void)
 			printf("TESTING: %s\n", response);
 			whoseTurn = menu(response);
 		}
-		
-
-
-
-
-		
-
 		
 	}
 
