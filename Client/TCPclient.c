@@ -247,9 +247,6 @@ char *decryptMessageClient(char *string, int key)
 
 int menu(char *server_input) //prints text and board game and apply the changes
 {
-
-	
-
 	if ((server_input[7] - '0') == 0)
 	{
 		if ((server_input[5] - '0') == 0)
@@ -267,6 +264,8 @@ int menu(char *server_input) //prints text and board game and apply the changes
 	{
 		printWiningPlayer(server_input[7] - '0');
 	}
+
+	printf("input string: %s\n", server_input);
 
 	return server_input[3] - '0';
 }

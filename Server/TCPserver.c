@@ -41,12 +41,11 @@ void initializeBoard()
 
 int is_board_full()
 {
-	int i = N - 1;
 	int count = 0;
 
 	for (int j = 0; j < M; j++)
 	{
-		if (board[i][j] != 0)
+		if (board[0][j] != 0)
 		{
 			count++;
 		}
@@ -300,13 +299,14 @@ int main(void)
 
 			printf("Message from client %d: %s -------> ", whoseTurn+1, messageToReceive);
 			messageToReceive = decryptMessageServer(messageToReceive);
-			printf("Decryption message: %s\n", messageToReceive);
+			printf("Decrypted message: %s\n", messageToReceive);
 			error_index = input_validation(messageToReceive);
 			
+			printf("error index: %d\n", error_index);
 			if (error_index)
 			{
 				setMessageToSend(0, 0, whoseTurn+1, error_index, 0);
-				printf("Seding error message %d to client %d\n", error_index, whoseTurn+1);
+				printf("Sending error message %d to client %d\n", error_index, whoseTurn+1);
 				send(client_fd[whoseTurn], &messageToSend, sizeof(messageToSend), 0);
 			}
 
@@ -402,6 +402,7 @@ int main(void)
 		char *encryptedMessage = encryptMessageServer(message);
 
 		send(client_fd[1], &encryptedMessage, sizeof(encryptedMessage), 0);
+		printf("Client 1 shut down unexpectedly\nServer shut down!\n");
 	}
 	else if (responseCode[1] == 0)
 	{
@@ -409,9 +410,10 @@ int main(void)
 		char *encryptedMessage = encryptMessageServer(message);
 
 		send(client_fd[0], &encryptedMessage, sizeof(encryptedMessage), 0);
+		printf("Client 2 shut down unexpectedly\nServer shut down!\n");
 	}
 
-	close(server_socket);
 
+	close(server_socket);
 	return 0;
 }
