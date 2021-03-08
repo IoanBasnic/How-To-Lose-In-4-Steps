@@ -370,7 +370,7 @@ int main(void)
 		printf("TEST -- %d -- %d\n", whoseTurn-1, whatPlayerAmI);
 
 
-		if(whoseTurn == whatPlayerAmI)
+		if(( whoseTurn - 1 ) == whatPlayerAmI)
 		{
 			printf("Please wait for other player move\n");
 			response_code = recv(server_socket, &response, sizeof(response), 0);
