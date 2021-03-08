@@ -241,6 +241,9 @@ int main(void)
 	int server_socket;
 	server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
+	int option = 1;
+	setsockopt(server_socket, SOL_SOCKET, SO_REUSEPORT, &option, sizeof(option));
+
 	//define the server address
 	struct sockaddr_in server_address;
 	server_address.sin_family = AF_INET;
