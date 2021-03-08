@@ -314,11 +314,13 @@ int main(void)
 		if (chech_win(whoseTurn))
 		{
 			setMessageToSend(0, 0, 0, 0, whoseTurn+1);
-			
+			char getMsg[256];
 			for (int i = 0; i < 2; i++)
 			{
-				printf("Sending winning message %s to client %d\n", messageToSend, i+1);
-				send(client_fd[i], &messageToSend, sizeof(messageToSend), 0);
+				printf("Sending winning message %s to client %d", messageToSend, i+1);
+				strcpy(getMsg, encryptMessageServer(messageToSend));
+				printf(" ----> with encrypted message: %s\n", getMsg);
+				send(client_fd[i], &getMsg, strlen(getMsg), 0);
 			}
 			close(server_socket);
 			return 0;
@@ -327,10 +329,13 @@ int main(void)
 		if (line == -1 || column == -1)
 		{
 			setMessageToSend(0, 0, 0, 6, 0);
+			char getMsg[256];
 			for (int i = 0; i < 2; i++)
 			{
-				printf("Sending unexpected error message  %s to client %d\n", messageToSend, i+1);
-				send(client_fd[i], &messageToSend, sizeof(messageToSend), 0);
+				printf("Sending unexpected error message  %s to client %d", messageToSend, i+1);
+				strcpy(getMsg, encryptMessageServer(messageToSend));
+				printf(" ----> with encrypted message: %s\n", getMsg);
+				send(client_fd[i], &getMsg, strlen(getMsg), 0);
 			}
 			close(server_socket);
 			return 0;

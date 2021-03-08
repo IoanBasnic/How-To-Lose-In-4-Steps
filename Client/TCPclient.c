@@ -370,10 +370,15 @@ int main(void)
 		printf("TEST -- %d -- %d\n", whoseTurn-1, whatPlayerAmI);
 
 
-		if(( whoseTurn - 1 ) == whatPlayerAmI)
+		if(( whoseTurn - 1 ) == whatPlayerAmI) //00-1/2-0-0 //0 - 1 (client 1 sau client 2)
 		{
 			printf("Please wait for other player move\n");
 			response_code = recv(server_socket, &response, sizeof(response), 0);
+			response[8] = '\0';
+
+	
+			strcpy(response, decryptMessageClient(response, 4));
+			printf("TESTING: %s\n", response);
 			whoseTurn = menu(response);
 		}
 
@@ -400,7 +405,7 @@ int main(void)
 
 	
 			strcpy(response, decryptMessageClient(response, 4));
-	
+			printf("TESTING: %s\n", response);
 			whoseTurn = menu(response);
 		}
 		
