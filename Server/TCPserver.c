@@ -21,8 +21,8 @@ char* messageToSend;
 void setMessageToSend(int lineToSet, int columnToSet, int player, int error, int status){
 	free(messageToSend);
 
-	messageToSend = (char*)malloc(sizeof(char) * 9);
-	sprintf(messageToSend, "%d%d-%d-%d-%d", lineToSet, columnToSet, player, error, status);
+	messageToSend = malloc(sizeof(char * ) * 9);
+	snprintf(messageToSend, 10, "%d%d-%d-%d-%d", lineToSet, columnToSet, player, error, status);
 }
 
 void initializeBoard()
@@ -156,7 +156,7 @@ int input_validation(char *input)
 
 char *encryptMessageServer(char *string)
 {
-	char *message = malloc(4 * sizeof(char *));
+	char *message = malloc(10 * sizeof(char *));
 	;
 	memcpy(message, string, strlen(string));
 	char aux;
@@ -255,20 +255,26 @@ int main(void)
 	int client_fd[2];
 
 	//First we send each client the allocated to number, so they know which client they are
+
+	printf("--------------------------------------------------------------------------------\n");
 	for (int i = 0; i < 2; i++)
 	{
 		client_fd[i] = accept(server_socket, NULL, NULL);
 		int message = i;
+		printf("Sending ACCEPT response to client %d\n", i+1);
 		send(client_fd[i], &message, sizeof(message), 0);
 	}
-
+	//printf("--------------------------------------------------------------------------------\n");
 	int responseCode[2] = {1, 1};
 	int whoseTurn = 0;
 	int otherPlayer = 1;
 	initializeBoard();
 
+
 	while (responseCode[0] != 0 && responseCode[1] != 0)
 	{
+
+		printf("--------------------------------------------------------------------------------\n");
 		char *messageToReceive = (char *)malloc(sizeof(char) * 255);
 
 		if (is_board_full())
@@ -288,14 +294,16 @@ int main(void)
 		do
 		{
 			recv(client_fd[whoseTurn], messageToReceive, sizeof(char), 0);
-			messageToReceive = decryptMessageServer(messageToReceive);
-			error_index = input_validation(messageToReceive);
 
+			printf("Message from client %d: %s -------> ", whoseTurn+1, messageToReceive);
+			messageToReceive = decryptMessageServer(messageToReceive);
+			printf("Decryption message: %s\n", messageToReceive);
+			error_index = input_validation(messageToReceive);
+			
 			if (error_index)
 			{
 				setMessageToSend(0, 0, whoseTurn+1, error_index, 0);
-				printf("%s\n", messageToSend);
-
+				printf("Seding error message %d to client %d\n", error_index, whoseTurn+1);
 				send(client_fd[whoseTurn], &messageToSend, sizeof(messageToSend), 0);
 			}
 
@@ -306,10 +314,13 @@ int main(void)
 		if (chech_win(whoseTurn))
 		{
 			setMessageToSend(0, 0, 0, 0, whoseTurn+1);
-			
+			char getMsg[256];
 			for (int i = 0; i < 2; i++)
 			{
-				send(client_fd[i], &messageToSend, sizeof(messageToSend), 0);
+				printf("Sending winning message %s to client %d", messageToSend, i+1);
+				strcpy(getMsg, encryptMessageServer(messageToSend));
+				printf(" ----> with encrypted message: %s\n", getMsg);
+				send(client_fd[i], &getMsg, strlen(getMsg), 0);
 			}
 			close(server_socket);
 			return 0;
@@ -318,9 +329,13 @@ int main(void)
 		if (line == -1 || column == -1)
 		{
 			setMessageToSend(0, 0, 0, 6, 0);
+			char getMsg[256];
 			for (int i = 0; i < 2; i++)
 			{
-				send(client_fd[i], &messageToSend, sizeof(messageToSend), 0);
+				printf("Sending unexpected error message  %s to client %d", messageToSend, i+1);
+				strcpy(getMsg, encryptMessageServer(messageToSend));
+				printf(" ----> with encrypted message: %s\n", getMsg);
+				send(client_fd[i], &getMsg, strlen(getMsg), 0);
 			}
 			close(server_socket);
 			return 0;
@@ -328,15 +343,36 @@ int main(void)
 		else
 		{
 			setMessageToSend(line, column, whoseTurn+1, 0, 0);
-			send(client_fd[otherPlayer], &messageToSend, sizeof(messageToSend), 0);
-			send(client_fd[whoseTurn], &messageToSend, sizeof(messageToSend), 0);
+			//printf("%s ---- %d\n", messageToSend, whoseTurn);
+			//char * Sent;
+			// for(int i = 0; i < 1; i++)
+			// {
+			// 	if ( i == 0)
+			// 	{
+			// 		send(client_fd[otherPlayer], &messageToSend, sizeof(messageToSend), 0);
+			// 		recv(client_fd[otherPlayer], Sent, sizeof(char), 0);
+			// 	}
 
+			// 	else
+			// 	{
+			// 		send(client_fd[whoseTurn], &messageToSend, sizeof(messageToSend), 0);
+			// 		recv(client_fd[whoseTurn], Sent, sizeof(char), 0);
+			// 	}
+			// }q
+			char test[255];
+
+			strcpy(test, encryptMessageServer(messageToSend));
+			printf("Message going for both clients: %s ---> with encrypted message: %s\n", messageToSend, test);
+			send(client_fd[otherPlayer], &test, strlen(test), 0);
+			send(client_fd[whoseTurn], &test, strlen(test), 0);
+			//recv(client_fd[otherPlayer], Sent, sizeof(char), 0);
 			column = -1;
 			line = -1;
 
 			int aux = whoseTurn;
 			whoseTurn = otherPlayer;
 			otherPlayer = aux;
+
 		}
 		/* if not player turn -> error_index = 6
          * input_validation(message); v
