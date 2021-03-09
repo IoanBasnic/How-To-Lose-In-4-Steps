@@ -129,6 +129,7 @@ void printWiningPlayer(int input)
 			printf("Something wrong with the input number\n");
 	}
 
+	sleep(3);
 	close(server_socket);
 	exit(0);
 
@@ -359,6 +360,7 @@ int main(void)
 		
 	}
 
+	sleep(3);
 	close(server_socket);
 	return 0;
 }

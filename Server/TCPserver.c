@@ -280,6 +280,7 @@ int main(void)
 			{
 				send(client_fd[i], &messageToSend, sizeof(messageToSend), 0);
 			}
+			sleep(3);
 			close(server_socket);
 			return 0;
 		}
@@ -321,6 +322,7 @@ int main(void)
 				printf(" ----> with encrypted message: %s\n", getMsg);
 				send(client_fd[i], &getMsg, strlen(getMsg), 0);
 			}
+			sleep(3);
 			close(server_socket);
 			return 0;
 		}
@@ -336,6 +338,7 @@ int main(void)
 				printf(" ----> with encrypted message: %s\n", getMsg);
 				send(client_fd[i], &getMsg, strlen(getMsg), 0);
 			}
+			sleep(3);
 			close(server_socket);
 			return 0;
 		}
@@ -390,7 +393,7 @@ int main(void)
 		printf("Client 2 shut down unexpectedly\nServer shut down!\n");
 	}
 
-
+	sleep(3);
 	close(server_socket);
 	return 0;
 }
