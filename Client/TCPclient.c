@@ -39,7 +39,7 @@ errors server_errors[] = {
 		[5] = {"Something unexpected went wrong"}
 		};
 
-void displayBoard()
+void display_board()
 {
 	for (int i = 0, j = 0; i < 13; i++)
 	{
@@ -72,44 +72,21 @@ void displayBoard()
 	}
 }
 
-void clearScreen()
+void clear_screen()
 {
-	for (int i = 0; i < 1; i++)
-	{
-		//printf("\n");
-		system("clear");
-	}
+	system("clear");
 }
 
 
-void ShowMessageError(int input) // needs to be discused
+void show_message_error(int input) // needs to be discused
 {
-	switch(input)
-	{
-		case 1:
-			printf("%s\n", server_errors[0].error_name);
-			break;
-		case 2:
-			printf("%s\n", server_errors[1].error_name);
-			break;
-		case 3:
-			printf("%s\n", server_errors[2].error_name);
-			break;
-		case 4:
-			printf("%s\n", server_errors[3].error_name);
-			break;
-		case 5:
-			printf("%s\n", server_errors[4].error_name);
-			break;
-		case 6:
-			printf("%s\n", server_errors[5].error_name);
-			break;
-		default:
-			printf("Something wrong with the err number\n");
-	}
+	if(input >= 0 && input < 7)
+		printf("%s\n", server_errors[input-1].error_name);
+	else
+		printf("Something wrong with the err number\n");
 }
 
-void printWiningPlayer(int input)
+void print_wining_player(int input)
 {
 	switch(input)
 	{
@@ -132,21 +109,19 @@ void printWiningPlayer(int input)
 	sleep(3);
 	close(server_socket);
 	exit(0);
-
 }
 
-void applyChanges(char *server_input) //e.g. of input "11-1", where 11 is the position and "-1" (or "1") is the player
+void apply_changes(char *server_input) //e.g. of input "11-1", where 11 is the position and "-1" (or "1") is the player
 {
 	disc[server_input[0] - '0'][server_input[1] - '0'] = server_input[3] - '0';
 }
 
 //ENCRYPT &  DECRYPT MESSAGE
 
-char *encryptMessageClient(char *string, int key)
+char *encrypt_message_client(char *string, int key)
 {
 
 	char *message = malloc(4 * sizeof(char *));
-	;
 	memcpy(message, string, strlen(string));
 	char aux;
 
@@ -183,7 +158,7 @@ char *encryptMessageClient(char *string, int key)
 	return (char *)message;
 }
 
-char *decryptMessageClient(char *string, int key)
+char *decrypt_message_client(char *string, int key)
 {
 
 	char *message = malloc(10 * sizeof(char *));
@@ -222,21 +197,21 @@ int menu(char *server_input) //prints text and board game and apply the changes
 	{
 		if ((server_input[5] - '0') == 0)
 		{
-			clearScreen();
-			applyChanges(server_input);
-			displayBoard();
+			clear_screen();
+			apply_changes(server_input);
+			display_board();
 		}
 		else
 		{
-			ShowMessageError(server_input[5] - '0');
+			show_message_error(server_input[5] - '0');
 		}
 	}
 	else
 	{
-		clearScreen();
-		applyChanges(server_input);
-		displayBoard();
-		printWiningPlayer(server_input[7] - '0');
+		clear_screen();
+		apply_changes(server_input);
+		display_board();
+		print_wining_player(server_input[7] - '0');
 	}
 
 	return server_input[3] - '0';
@@ -244,7 +219,6 @@ int menu(char *server_input) //prints text and board game and apply the changes
 
 int main(void)
 {
-	//displayBoard();
 	printf("Connecting to the server. Please wait...\n");
 	//create socket
 	server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -261,7 +235,6 @@ int main(void)
 	int connection_status = connect(server_socket, (struct sockaddr *)&server_address, sizeof(server_address));
 
 	//check for error with connection
-
 	if (connection_status == -1)
 	{
 		printf("There was an error, can't make a connection to the remote socket\n");
@@ -280,17 +253,17 @@ int main(void)
 	int checkErr = 0;
 	if(whatPlayerAmI == 1)
 	{
-		displayBoard();
+		display_board();
 		printf("Please wait for player 1 move\n");
 		response_code = recv(server_socket,  &response, 9, 0);
 		response[8] = '\0';
-		strcpy(response, decryptMessageClient(response, 4));
+		strcpy(response, decrypt_message_client(response, 4));
 		
 	}
 
 	while (whatPlayerAmI == 0 && checkErr == 0)
 	{
-		displayBoard();
+		display_board();
 		printf("What column(A-G) would you like to start with?\n");
 		//CHECK IF INPUT IS MORE THAN 1 CHAR
 		scanf("%s", choice);
@@ -300,16 +273,16 @@ int main(void)
 			scanf("%s\n", choice);
 		}
 
-		memcpy(response_encrypt, encryptMessageClient(choice, 4), 1);
+		memcpy(response_encrypt, encrypt_message_client(choice, 4), 1);
 		char final_response = response_encrypt[0];
 		send(server_socket, &final_response, sizeof(final_response), 0);
 		response_code = recv(server_socket,  &response, 9, 0);
 		response[8] = '\0';
-		strcpy(response, decryptMessageClient(response, 4));
+		strcpy(response, decrypt_message_client(response, 4));
 
 		if((response[5] - '0') != 0)
 		{
-			ShowMessageError(response[5] - '0');
+			show_message_error(response[5] - '0');
 		}
 		else
 		{
@@ -327,10 +300,9 @@ int main(void)
 			printf("Please wait for other player move\n");
 			response_code = recv(server_socket, &response, sizeof(response), 0);
 			response[8] = '\0';
-			strcpy(response, decryptMessageClient(response, 4));
+			strcpy(response, decrypt_message_client(response, 4));
 			whoseTurn = menu(response);
 		}
-
 		else
 		{
 			while(checkErr == 0)
@@ -338,16 +310,16 @@ int main(void)
 				printf("Choose a column (A-G):\n");
 				//CHECK IF INPUT IS MORE THAN 1 CHAR
 				scanf("%s", choice);
-				memcpy(response_encrypt, encryptMessageClient(choice, 4), 1);
+				memcpy(response_encrypt, encrypt_message_client(choice, 4), 1);
 				char final_response = response_encrypt[0];
 				send(server_socket, &final_response, sizeof(final_response), 0);
 				response_code = recv(server_socket,  &response, 9, 0);
 				response[8] = '\0';
-				strcpy(response, decryptMessageClient(response, 4));
+				strcpy(response, decrypt_message_client(response, 4));
 
 				if((response[5] - '0') != 0)
 				{
-					ShowMessageError(response[5] - '0');
+					show_message_error(response[5] - '0');
 				}
 				else
 				{
