@@ -80,7 +80,7 @@ void clear_screen()
 
 void show_message_error(int input) // needs to be discused
 {
-	if(input >= 0 && input < 7)
+	if(input > 0 && input < 7)
 		printf("%s\n", server_errors[input-1].error_name);
 	else
 		printf("Something wrong with the err number\n");
