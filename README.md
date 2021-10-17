@@ -2,7 +2,7 @@
 # DP Project - How To Lose In 4 Steps (Connect 4)
 Team Members: **Ioan BAȘNIC, Sebastian BELEA, Petra HORVATH**
 ## What is it?
-How To Lose In 4 Steps is the implementation of the classic game, Connect 4. In a nuttshell, our program is nothing more than a small TCP application that uses various tehnologies like BSD sockets. 
+How To Lose In 4 Steps is the implementation of the classic game, Connect 4. In a nutshell, our program is nothing more than a small TCP application that uses various tehnologies like BSD sockets. 
 
 ## Architecture
 As an architecture, the application is comprised of two major components, the `client` side and the `server` side. 
